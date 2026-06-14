@@ -15,3 +15,6 @@ While the initial study successfully demonstrated the technical feasibility of t
 
 ## 🚀 Future Roadmap
 To close the current safety gap and ensure a clinically safe detection rate of **>90%**, future work will pivot to advanced deep learning methodologies. The immediate priority is replacing the current classification model with a **dual-phased Convolutional Neural Network (CNN)**.
+
+## YouTube Link
+https://youtu.be/9myYjhYjoVM
