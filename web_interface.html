@@ -1,0 +1,1697 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mammography Analysis System - South African Department of Health</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* Official SA Government Header */
+        .government-header {
+            background: linear-gradient(90deg, #ffffff 0%, #cbfadeef 100%);
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border-bottom: 4px solid #ffd700;
+            
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .sa-coat-of-arms {
+            width: 500px;
+            height: 100px;
+            display: flex;
+            position: relative;
+        }
+
+        /* .sa-coat-of-arms::before {
+            content: "🇿🇦";
+            font-size: 24px;
+        } */
+
+        .dept-title {
+            flex-grow: 1;
+        }
+
+        .system-info {
+            text-align: right;
+            font-size: 0.9em;
+            color:#31663e;
+        }
+
+        .system-info div {
+            margin-bottom: 2px;
+        }
+
+        /* Navigation Bar */
+        .navigation-bar {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: flex-start;
+            gap: 0;
+        }
+
+        .nav-link {
+            background: none;
+            color: #495057;
+            padding: 16px 24px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link:hover {
+            background: #f8f9fa;
+            color: #1e7e34;
+        }
+
+        .nav-link.active {
+            color: #1e7e34;
+            border-bottom-color: #28a745;
+            background: #f0f8f4;
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #28a745;
+        }
+
+        .page-header h2 {
+            font-size: 2em;
+            color: #1e7e34;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .page-header p {
+            font-size: 1.1em;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .system-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #856404;
+        }
+
+        /* Model Status Section */
+        .model-status {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #28a745;
+        }
+
+        .model-status h3 {
+            color: #1e7e34;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-status h3::before {
+            color: #1e7e34;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .model-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #dee2e6;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .model-card.loaded {
+            border-left-color: #28a745;
+            background: linear-gradient(145deg, #f0f8f4, #e8f5e8);
+        }
+
+        .model-card.missing {
+            border-left-color: #dc3545;
+            background: linear-gradient(145deg, #fdf2f2, #f8d7da);
+        }
+
+        .model-card.partial {
+            border-left-color: #ffc107;
+            background: linear-gradient(145deg, #fffbf0, #fff3cd);
+        }
+
+        .model-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .model-details {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .model-method {
+            font-size: 0.8em;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-top: 8px;
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            color: #495057;
+        }
+
+        .system-warning {
+            background: linear-gradient(145deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .content-panel {
+            background: rgb(49, 49, 49);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(41, 41, 41, 0.1);
+        }
+
+        .content-panel h2 {
+            color:#ffffff;
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f5e8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Upload Section */
+        .upload-section h2::before {
+            content: "📋";
+        }
+
+        .upload-area {
+            border: 2px dashed #28a745;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(145deg, #000000, #222222);
+        }
+
+        .upload-area:hover {
+            border-color: #1e7e34;
+            background: linear-gradient(145deg, #f0f8f4, #e8f5e8);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #1e7e34;
+            background: linear-gradient(145deg, #e8f5e8, #d4edda);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3.5em;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.1em;
+            color: #f8f8f8;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .upload-text small {
+            display: block;
+            margin-top: 8px;
+            color: #6c757d;
+            font-size: 0.9em;
+            font-weight: 400;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #28a745, #1e7e34);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(145deg, #1e7e34, #155724);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .analyze-btn {
+            background: linear-gradient(145deg, #11e061, #82f59f);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.2em;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .analyze-btn:enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .analyze-btn:enabled:hover {
+            background: linear-gradient(145deg, #138496, #117a8b);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .analyze-btn.partial-models {
+            background: linear-gradient(145deg, #ffc107, #e0a800);
+            color: #212529;
+        }
+
+        .analyze-btn.partial-models:hover {
+            background: linear-gradient(145deg, #e0a800, #d39e00);
+        }
+
+        .analyze-btn.no-models {
+            background: linear-gradient(145deg, #6c757d, #5a6268);
+        }
+
+        /* Image Preview */
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+        }
+
+        /* Results Section */
+        .results-section h2::before {
+            content: "📊";
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            flex-direction: column;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e3e3e3;
+            border-top: 4px solid #28a745;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-steps {
+            text-align: center;
+            margin-top: 20px;
+            max-width: 400px;
+            background: #4e4d4d;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #6d6d6d;
+        }
+
+        .loading-step {
+            padding: 10px 0;
+            color: #6c757d;
+            font-size: 0.95em;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        .loading-step:last-child {
+            border-bottom: none;
+        }
+
+        .loading-step.active {
+            color: #1e7e34;
+            font-weight: 600;
+            background: #e8f5e8;
+            border-radius: 6px;
+            padding: 10px 15px;
+        }
+
+        .loading-step.completed {
+            color: #28a745;
+        }
+
+        .loading-step.skipped {
+            color: #ffc107;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .loading-step.error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Prediction Results */
+        .prediction-result {
+            background: linear-gradient(145deg, #1e7e34, #28a745);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .prediction-value {
+            font-size: 2.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .prediction-label {
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prediction-confidence {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .prediction-details {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        /* Info Sections */
+        .info-section {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-section h3::before {
+            content: "📋";
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .info-value {
+            color: #1e7e34;
+            font-weight: 600;
+        }
+
+        .info-value.unavailable {
+            color: #ffc107;
+            font-style: italic;
+        }
+
+        .info-value.error {
+            color: #dc3545;
+            font-style: italic;
+        }
+
+        /* Visualization Sections */
+        .viz-section {
+            margin-bottom: 30px;
+        }
+
+        .viz-title {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .viz-title::before {
+            content: "🖼️";
+        }
+
+        .viz-container {
+            text-align: center;
+            padding: 25px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            background: linear-gradient(145deg, #252525, #5c5c5c);
+            transition: all 0.3s ease;
+        }
+
+        .viz-container.loading {
+            border-color: #28a745;
+            background: linear-gradient(145deg, #252525, #5c5c5c);
+        }
+
+        .viz-container.error {
+            border-color: #dc3545;
+            background: linear-gradient(145deg, #252525, #5c5c5c);
+        }
+
+        .viz-container.unavailable {
+            border-color: #ffc107;
+            background: linear-gradient(145deg, #252525, #5c5c5c);
+        }
+
+        .viz-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border: 1px solid #dee2e6;
+        }
+
+        .viz-image:hover {
+            transform: scale(1.05);
+        }
+
+        .viz-placeholder {
+            color: #6c757d;
+            margin: 0;
+            padding: 40px 20px;
+            font-size: 1em;
+        }
+
+        /* Processing Info */
+        .processing-info {
+            background: linear-gradient(145deg, #e8f5e8, #d4edda);
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border-left: 4px solid #28a745;
+        }
+
+        .processing-info.partial {
+            background: linear-gradient(145deg, #fff3cd, #ffeaa7);
+            border-left-color: #ffc107;
+        }
+
+        .processing-info.success {
+            background: linear-gradient(145deg, #d4edda, #c3e6cb);
+            border-left-color: #28a745;
+        }
+
+        .processing-details {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 15px;
+            font-size: 0.95em;
+            text-align: left;
+        }
+
+        /* Error States */
+        .error {
+            background: linear-gradient(145deg, #f8d7da, #f5c6cb);
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .error h3 {
+            margin-bottom: 15px;
+        }
+
+        .error-details {
+            margin-top: 20px;
+            font-size: 0.9em;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: linear-gradient(145deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .disclaimer h4 {
+            margin-bottom: 15px;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .disclaimer h4::before {
+            content: "⚠️";
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .modal-close:hover {
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .footer-content p {
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .dept-title h1 {
+                font-size: 1.4em;
+            }
+
+            .system-info {
+                text-align: center;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .page-header h2 {
+                font-size: 1.6em;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-link {
+                text-align: center;
+                border-bottom: 1px solid #e9ecef;
+                border-right: none;
+            }
+
+            .model-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .prediction-value {
+                font-size: 2.2em;
+            }
+
+            .detail-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .upload-area {
+                padding: 30px 20px;
+            }
+
+            .sa-coat-of-arms {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Government Header -->
+    <div class="government-header">
+        <div class="header-content">
+            <div class="dept-identity">
+                <div class="sa-coat-of-arms">
+                    <!-- <img src="images/South_African_National_Department_of_Health_logo_2023.png" alt="South African Coat of Arms"> -->
+                </div>
+            </div>
+            <div class="system-info">
+                <b><div>AI-Driven Mammography Analysis System</div>
+                <div>Detection & Classification Demo</div></b>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation-bar">
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="web_interface.html" class="nav-link active">New Analysis</a>
+                <a href="analysis_history.html" class="nav-link">Analysis History</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>AI-Driven Mammography Analysis System for Breast Cancer</h2>
+            <p>Advanced artificial intelligence clinical decision support tool for breast cancer screening and diagnostic assistance in South African public healthcare facilities</p>
+        <!-- </div> -->
+
+        <!-- AI Model Status -->
+        <div id="modelStatus">
+            <h3>AI System Status Monitor</h3>
+            <div id="modelGrid" class="model-grid">
+                <div class="model-card">
+                    <div class="model-title">System Status Verification</div>
+                    <div class="model-details">Verifying AI model availability and system operational status...</div>
+                </div>
+            </div>
+            <div id="systemWarning" class="system-warning" style="display: none;"></div>
+        </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Upload Panel -->
+            <div class="content-panel">
+                <h2 class="upload-section">Upload Mammography Image</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📋</div>
+                    <div class="upload-text">
+                        Select or drag mammography image file here
+                        <small>Supported formats: TIFF, DICOM, PNG, JPG, PGM | Maximum file size: 50MB</small>
+                    </div>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Select Medical Image File
+                    </button>
+                    <input type="file" id="fileInput" class="file-input" accept=".tiff,.tif,.dcm,.png,.jpg,.jpeg,.pgm">
+                </div>
+
+                <div id="imagePreview" style="display: none;">
+                    <img id="previewImg" class="image-preview" alt="Uploaded mammography">
+                    <p id="fileName" style="text-align: center; margin-top: 15px; color: #666; font-weight: 500;"></p>
+                </div>
+
+                <button class="analyze-btn" id="analyzeBtn" disabled>
+                    Initiate AI Analysis
+                </button>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="content-panel">
+                <h2 class="results-section">Analysis Results</h2>
+
+                <div id="loadingState" class="loading" style="display: none;">
+                    <p style="text-align: center; font-weight: 600; color: #1e7e34;">Analyzing mammogram...</p>
+                    <div class="spinner"></div>
+                    <div class="loading-steps">
+                        <div class="loading-step" id="step1">Image preprocessing and validation</div>
+                        <div class="loading-step" id="step2">Region of interest detection</div>
+                        <div class="loading-step" id="step3">Pixel-level analysis</div>
+                        <div class="loading-step" id="step4">AI classification processing</div>
+                        <div class="loading-step" id="step5">Generating clinical visualizations</div>
+                        <div class="loading-step" id="step6">Compiling final report</div>
+                    </div>
+                </div>
+
+                <div id="results" class="results">
+                    <div class="prediction-result">
+                        <div class="prediction-value" id="predictionResult">Unknown</div>
+                        <div class="prediction-label">AI Classification Result</div>
+                        <div class="prediction-confidence" id="predictionConfidence">Confidence Level: 0%</div>
+
+                        <div class="prediction-details" id="predictionDetails" style="display: none;">
+                            <div class="detail-row">
+                                <span class="detail-label">Abnormality Type:</span>
+                                <span class="detail-value" id="abnormalityType">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Description:</span>
+                                <span class="detail-value" id="abnormalityDescription">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Severity Classification:</span>
+                                <span class="detail-value" id="severityClass">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">AI Reasoning:</span>
+                                <span class="detail-value" id="classificationReason">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>AI-Generated Visualizations</h3>
+                    
+                        <div class="viz-section">
+                            <div class="viz-title">Region of Interest (ROI) Detected</div>
+                                <div class="viz-container" id="roiVisualization">
+                                    <img id="roiImage" class="viz-image" style="display: none;" alt="ROI Analysis">
+                                    <p id="roiPlaceholder" class="viz-placeholder">ROI visualization will be displayed after analysis completion</p>
+                                <!-- </div>  -->
+                            <!-- </div>
+                            <div class="viz-section"> -->
+                                <div class="viz-container" id="plaVisualization">
+                                    <img id="plaImage" class="viz-image" style="display: none;" alt="PLA Analysis">
+                                    <p id="plaPlaceholder" class="viz-placeholder">ROI visualization will be displayed after analysis
+                                        completion</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="info-section">
+                        <h3>Predicted Analysis Details</h3>
+                        <div class="info-item">
+                            <span class="info-label">Estimated Lesion Size:</span>
+                            <span class="info-value" id="lesionSize">0.0 mm</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Risk Assessment Score:</span>
+                            <span class="info-value" id="riskScore">0.0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Detection Confidence:</span>
+                            <span class="info-value" id="abnormalityConfidence">N/A</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Classification Confidence:</span>
+                            <span class="info-value" id="severityConfidence">N/A</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Processing Duration:</span>
+                            <span class="info-value" id="processingTime">0.0s</span>
+                        </div>
+                    </div>
+
+                    <div class="processing-info" id="processingInfo">
+                        <strong>Analysis Status: Complete</strong>
+                        <div class="processing-details" id="processingDetails">
+                            <div class="detail-row">
+                                <span>ROI Detection Status:</span>
+                                <span id="roiMethodStatus">Pending</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>PLA Processing Status:</span>
+                                <span id="plaMethodStatus">Pending</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Classification Status:</span>
+                                <span id="classificationMethodStatus">Pending</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Active AI Models:</span>
+                                <span id="modelsUsedStatus">0/3 models</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="errorState" class="error" style="display: none;">
+                    <h3>Analysis Error</h3>
+                    <p id="errorMessage">An error occurred during the analysis process.</p>
+                    <div class="error-details" id="errorDetails" style="display: none;">
+                        <strong>Technical Information:</strong>
+                        <div id="errorDetailsContent"></div>
+                    </div>
+                    <div style="margin-top: 20px; font-size: 0.9em;">
+                        <strong>Recommended Actions:</strong>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>Verify the uploaded file format and integrity</li>
+                            <li>Ensure all AI models are properly loaded</li>
+                            <li>Check system connectivity and resources</li>
+                            <li>Contact technical support if issues persist</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Modal -->
+        <div id="imageModal" class="modal">
+            <span class="modal-close" onclick="closeImageModal()">&times;</span>
+            <div class="modal-content">
+                <img id="modalImage" alt="Full size visualization">
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <h4>Academic Research Support Notice</h4>
+            <p><strong>IMPORTANT:</strong>
+            This AI system is a simulation of an AI-driven mammography analysis system developed exclusively for academic and
+            research purposes. Under no circumstances can this system be used for medical diagnosis, treatment, or patient care at this stage.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-content">
+            <p>&copy; Modjadji MJ. Mphekwane, BScHons in Computer Science with AI</p>
+            <p>AI Mammography Analysis System v2.0 | Honours Year Research Project Simulation</p>
+        </div>
+    </div>
+
+    <script>
+        class MammographyAnalyzer {
+            constructor() {
+                this.uploadArea = document.getElementById('uploadArea');
+                this.fileInput = document.getElementById('fileInput');
+                this.analyzeBtn = document.getElementById('analyzeBtn');
+                this.uploadedFile = null;
+                this.modelStatus = {};
+                this.debugMode = false;
+                this.loadingInterval = null;
+                this.setupEventListeners();
+                this.checkModelStatus();
+
+                const urlParams = new URLSearchParams(window.location.search);
+                this.debugMode = urlParams.get('debug') === 'true';
+                if (this.debugMode) {
+                    document.getElementById('debugInfo').style.display = 'block';
+                }
+            }
+
+            setupEventListeners() {
+                this.fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFile(e.target.files[0]);
+                    }
+                });
+
+                this.uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.add('dragover');
+                });
+
+                this.uploadArea.addEventListener('dragleave', () => {
+                    this.uploadArea.classList.remove('dragover');
+                });
+
+                this.uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.remove('dragover');
+                    if (e.dataTransfer.files.length > 0) {
+                        this.handleFile(e.dataTransfer.files[0]);
+                    }
+                });
+
+                this.analyzeBtn.addEventListener('click', () => {
+                    this.analyzeImage();
+                });
+
+                document.getElementById('roiImage').addEventListener('click', () => {
+                    this.openImageModal(document.getElementById('roiImage').src);
+                });
+
+                document.getElementById('plaImage').addEventListener('click', () => {
+                    this.openImageModal(document.getElementById('plaImage').src);
+                });
+            }
+
+            async checkModelStatus() {
+                try {
+                    this.log('Checking model and module status...');
+                    const response = await fetch('/api/models');
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    this.log('Model status response:', data);
+
+                    this.modelStatus = data.models || {};
+                    this.displayModelStatus(data);
+
+                } catch (error) {
+                    console.error('Failed to check model status:', error);
+                    this.log('Model status check error:', error);
+                    this.modelStatus = {};
+                    this.displayModelStatus(null);
+                }
+            }
+
+            displayModelStatus(data) {
+                const modelGrid = document.getElementById('modelGrid');
+                const systemWarning = document.getElementById('systemWarning');
+
+                if (!data) {
+                    modelGrid.innerHTML = `
+                        <div class="model-card missing">
+                            <div class="model-title">❌ Connection Error</div>
+                            <div class="model-details">Unable to check model status - server may be down</div>
+                            <div class="model-method">Check server connection</div>
+                        </div>
+                    `;
+                    systemWarning.style.display = 'block';
+                    systemWarning.innerHTML = '❌ Cannot connect to backend server. Please ensure the server is running on the correct port.';
+                    this.updateAnalyzeButtonDisabled('No server connection');
+                    return;
+                }
+
+                const models = data.models || {};
+                let html = '';
+                let availableCount = 0;
+                let totalCount = 3;
+
+                // ROI Model Status
+                const roiModel = models.roi_model || {};
+                const roiLoaded = roiModel.loaded === true;
+                const roiStatus = roiLoaded ? 'loaded' : 'missing';
+                const roiStatusText = roiLoaded ? '✅ Available & Ready' : '❌ Not Available';
+                const roiDetails = this.buildModelDetails(roiModel, 'ROI');
+
+                html += this.createModelCard('ROI Model', roiStatus, roiStatusText, roiDetails, 'predict_single_image_roi');
+                if (roiLoaded) availableCount++;
+
+                // PLA Extractor Status
+                const plaModel = models.pla_extractor || {};
+                const plaLoaded = plaModel.loaded === true;
+                const plaStatus = plaLoaded ? 'loaded' : 'missing';
+                const plaStatusText = plaLoaded ? '✅ Available & Ready' : '❌ Not Available';
+                const plaDetails = this.buildModelDetails(plaModel, 'PLA');
+
+                html += this.createModelCard('PLA Extractor', plaStatus, plaStatusText, plaDetails, 'process_and_save_single_image');
+                if (plaLoaded) availableCount++;
+
+                // Classifier Status
+                const classModel = models.classifier || {};
+                const classLoaded = classModel.loaded === true;
+                const classStatus = classLoaded ? 'loaded' : 'missing';
+                const classStatusText = classLoaded ? '✅ Available & Ready' : '❌ Not Available';
+                const classDetails = this.buildModelDetails(classModel, 'Classifier');
+
+                html += this.createModelCard('Classification Model', classStatus, classStatusText, classDetails, 'predict_single_image');
+                if (classLoaded) availableCount++;
+
+                modelGrid.innerHTML = html;
+
+                this.updateSystemStatus(availableCount, totalCount, systemWarning);
+                this.updateAnalyzeButton(availableCount, totalCount);
+            }
+
+            buildModelDetails(modelInfo, type) {
+                if (!modelInfo || Object.keys(modelInfo).length === 0) {
+                    return `${type} information not available`;
+                }
+
+                let details = [];
+
+                if (type === 'ROI') {
+                    details.push(`Module: ${modelInfo.roi_mask_module_available ? '✓' : '✗'}`);
+                    details.push(`Checkpoint: ${modelInfo.exists ? '✓' : '✗'}`);
+                } else if (type === 'PLA') {
+                    details.push(`Module: ${modelInfo.module_available ? '✓' : '✗'}`);
+                    details.push(`Initialized: ${modelInfo.class_initialized ? '✓' : '✗'}`);
+                } else if (type === 'Classifier') {
+                    details.push(`Classifier Module: ${modelInfo.classifier_module_available ? '✓' : '✗'}`);
+                    details.push(`Feature Module: ${modelInfo.feature_module_available ? '✓' : '✗'}`);
+                    details.push(`Model Ready: ${modelInfo.model_trained ? '✓' : '✗'}`);
+                }
+
+                return details.length > 0 ? details.join(', ') : 'Status unknown';
+            }
+
+            updateSystemStatus(availableCount, totalCount, systemWarning) {
+                if (availableCount === 0) {
+                    systemWarning.style.display = 'block';
+                    systemWarning.innerHTML = '❌ No AI models available. System will provide minimal analysis functionality only.';
+                } else if (availableCount < totalCount) {
+                    systemWarning.style.display = 'block';
+                    systemWarning.innerHTML = `⚠️ ${availableCount}/${totalCount} AI models available. Analysis will proceed with reduced functionality.`;
+                } else {
+                    systemWarning.style.display = 'none';
+                }
+            }
+
+            createModelCard(title, status, statusText, details, method) {
+                return `
+                    <div class="model-card ${status}">
+                        <div class="model-title">${title}</div>
+                        <div class="model-details">${statusText}</div>
+                        <div class="model-details">${details}</div>
+                        <div class="model-method">Method: ${method}</div>
+                    </div>
+                `;
+            }
+
+            updateAnalyzeButton(availableCount, totalCount) {
+                if (!this.uploadedFile) return;
+
+                this.analyzeBtn.disabled = false;
+
+                if (availableCount === totalCount) {
+                    this.analyzeBtn.textContent = '🔍 Analyze with Full AI Pipeline';
+                    this.analyzeBtn.className = 'analyze-btn';
+                    this.analyzeBtn.title = 'All AI models loaded - complete analysis available';
+                } else if (availableCount > 0) {
+                    this.analyzeBtn.textContent = `🔍 Analyze with ${availableCount}/${totalCount} Models`;
+                    this.analyzeBtn.className = 'analyze-btn partial-models';
+                    this.analyzeBtn.title = 'Partial model availability - some features may be limited';
+                } else {
+                    this.analyzeBtn.textContent = '🔍 Basic Analysis Only';
+                    this.analyzeBtn.className = 'analyze-btn no-models';
+                    this.analyzeBtn.title = 'No AI models available - very limited functionality';
+                }
+            }
+
+            updateAnalyzeButtonDisabled(reason) {
+                this.analyzeBtn.disabled = true;
+                this.analyzeBtn.textContent = `❌ Analysis Unavailable (${reason})`;
+                this.analyzeBtn.className = 'analyze-btn';
+            }
+
+            handleFile(file) {
+                const validExtensions = ['.tiff', '.tif', '.png', '.jpg', '.jpeg', '.dcm', '.pgm'];
+                const fileName = file.name.toLowerCase();
+                const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+
+                if (!hasValidExtension) {
+                    this.showError('Invalid file format. Please upload a mammography image in one of these formats: ' + validExtensions.join(', '));
+                    return;
+                }
+
+                if (file.size > 50 * 1024 * 1024) { // 50MB limit
+                    this.showError('File too large. Please upload a file smaller than 50MB.');
+                    return;
+                }
+
+                this.uploadedFile = file;
+                this.showImagePreview(file);
+
+                const availableCount = Object.values(this.modelStatus).filter(m => m && m.loaded).length;
+                this.updateAnalyzeButton(availableCount, 3);
+            }
+
+            showImagePreview(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById('imagePreview');
+                    const img = document.getElementById('previewImg');
+                    const fileName = document.getElementById('fileName');
+
+                    img.src = e.target.result;
+                    fileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            async analyzeImage() {
+                if (!this.uploadedFile) {
+                    this.showError('Please upload an image first');
+                    return;
+                }
+
+                this.log('Starting analysis for:', this.uploadedFile.name);
+                this.resetUI();
+                this.showLoadingState();
+
+                try {
+                    const result = await this.performAnalysis();
+                    this.displayResults(result);
+                } catch (error) {
+                    this.log('Analysis error:', error);
+                    this.showError(error.message, error.details);
+                } finally {
+                    this.hideLoadingState();
+                }
+            }
+
+            resetUI() {
+                document.getElementById('results').classList.remove('show');
+                document.getElementById('errorState').style.display = 'none';
+                this.analyzeBtn.disabled = true;
+            }
+
+            showLoadingState() {
+                document.getElementById('loadingState').style.display = 'block';
+                this.simulateLoadingSteps();
+            }
+
+            hideLoadingState() {
+                document.getElementById('loadingState').style.display = 'none';
+                if (this.loadingInterval) {
+                    clearInterval(this.loadingInterval);
+                    this.loadingInterval = null;
+                }
+
+                const availableCount = Object.values(this.modelStatus).filter(m => m && m.loaded).length;
+                this.updateAnalyzeButton(availableCount, 3);
+            }
+
+            simulateLoadingSteps() {
+                const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'];
+                const stepRequirements = {
+                    'step2': 'roi_model',
+                    'step3': 'pla_extractor',
+                    'step4': 'classifier'
+                };
+
+                steps.forEach(stepId => {
+                    const element = document.getElementById(stepId);
+                    element.classList.remove('active', 'completed', 'skipped', 'error');
+                });
+
+                let currentStep = 0;
+                this.loadingInterval = setInterval(() => {
+                    if (currentStep > 0) {
+                        const prevStepId = steps[currentStep - 1];
+                        const prevElement = document.getElementById(prevStepId);
+                        prevElement.classList.remove('active');
+
+                        const requiredComponent = stepRequirements[prevStepId];
+                        if (requiredComponent && (!this.modelStatus[requiredComponent] || !this.modelStatus[requiredComponent].loaded)) {
+                            prevElement.classList.add('skipped');
+                        } else {
+                            prevElement.classList.add('completed');
+                        }
+                    }
+
+                    if (currentStep < steps.length) {
+                        const currentStepId = steps[currentStep];
+                        const currentElement = document.getElementById(currentStepId);
+                        currentElement.classList.add('active');
+                        currentStep++;
+                    } else {
+                        clearInterval(this.loadingInterval);
+                        this.loadingInterval = null;
+                    }
+                }, 1000);
+            }
+
+            async performAnalysis() {
+                const formData = new FormData();
+                formData.append('mammography', this.uploadedFile);
+
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    let errorDetails = null;
+                    try {
+                        const errorData = await response.json();
+                        errorDetails = errorData;
+                    } catch (e) {
+                    }
+
+                    throw new Error(`Analysis request failed (HTTP ${response.status})`, {
+                        details: errorDetails
+                    });
+                }
+
+                const result = await response.json();
+                this.log('Analysis result:', result);
+
+                if (result.error) {
+                    throw new Error(`Server error: ${result.error}`, {
+                        details: result
+                    });
+                }
+
+                return result;
+            }
+
+            displayResults(result) {
+                this.log('Displaying results');
+                this.updatePredictionResult(result);
+                this.updateAnalysisDetails(result);
+                this.updateVisualizations(result);
+                this.updateProcessingInfo(result);
+                document.getElementById('results').classList.add('show');
+            }
+
+            updatePredictionResult(result) {
+                const prediction = result.prediction || 'Unknown';
+                const confidence = result.confidence;
+
+                document.getElementById('predictionResult').textContent = prediction;
+
+                if (confidence !== undefined && confidence !== null && !isNaN(confidence)) {
+                    document.getElementById('predictionConfidence').textContent = `Confidence: ${Math.round(confidence * 100)}%`;
+                } else {
+                    document.getElementById('predictionConfidence').textContent = 'Confidence: Not Available';
+                }
+
+                const predictionDiv = document.querySelector('.prediction-result');
+                this.updatePredictionStyling(predictionDiv, prediction);
+
+                if (result.abnormality_type && result.abnormality_type !== 'UNKNOWN') {
+                    this.showPredictionDetails(result);
+                } else {
+                    document.getElementById('predictionDetails').style.display = 'none';
+                }
+            }
+
+            updatePredictionStyling(element, prediction) {
+                const styles = {
+                    'Malignant': 'linear-gradient(135deg, #fd79a8, #e84393)',
+                    'Benign': 'linear-gradient(135deg, #11998e, #38ef7d)',
+                    'Normal': 'linear-gradient(135deg, #74b9ff, #0984e3)'
+                };
+
+                element.style.background = styles[prediction] || 'linear-gradient(135deg, #ffeaa7, #fab1a0)';
+            }
+
+            showPredictionDetails(result) {
+                document.getElementById('predictionDetails').style.display = 'block';
+                document.getElementById('abnormalityType').textContent = result.abnormality_type || 'N/A';
+                document.getElementById('abnormalityDescription').textContent = result.abnormality_description || 'N/A';
+                document.getElementById('severityClass').textContent = result.severity_class || 'N/A';
+                document.getElementById('classificationReason').textContent = result.classification_reason || 'N/A';
+            }
+
+            updateAnalysisDetails(result) {
+                this.updateDetailValue('lesionSize', result.lesion_size_mm, 'mm', 'roi_model');
+                this.updateDetailValue('riskScore', result.risk_score, '', 'classifier', 3);
+                this.updateDetailValue('abnormalityConfidence', result.abnormality_confidence, '', 'classifier', 3);
+                this.updateDetailValue('severityConfidence', result.severity_confidence, '', 'classifier', 3);
+
+                const processingTime = result.processing_time || 0;
+                document.getElementById('processingTime').textContent = `${processingTime}s`;
+            }
+
+            updateDetailValue(elementId, value, unit, requiredComponent, decimals = 1) {
+                const element = document.getElementById(elementId);
+                const componentAvailable = this.modelStatus[requiredComponent]?.loaded === true;
+
+                if (value !== undefined && value !== null && !isNaN(value) && componentAvailable) {
+                    const displayValue = typeof value === 'number' ? value.toFixed(decimals) : value;
+                    element.textContent = `${displayValue}${unit}`;
+                    element.className = 'info-value';
+                } else {
+                    const reason = !componentAvailable ? 'Model unavailable' : 'Data not available';
+                    element.textContent = `N/A (${reason})`;
+                    element.className = 'info-value unavailable';
+                }
+            }
+
+            updateVisualizations(result) {
+                this.updateVisualization('roi', result.roi_visualization_path, 'roi_model');
+                this.updateVisualization('pla', result.pla_visualization_path, 'pla_extractor');
+            }
+
+            updateVisualization(type, imagePath, requiredComponent) {
+                const imageElement = document.getElementById(`${type}Image`);
+                const placeholderElement = document.getElementById(`${type}Placeholder`);
+                const containerElement = document.getElementById(`${type}Visualization`);
+
+                // Reset container classes
+                containerElement.className = 'viz-container';
+
+                const componentAvailable = this.modelStatus[requiredComponent]?.loaded === true;
+
+                if (imagePath && componentAvailable) {
+                    this.loadVisualizationImage(type, imagePath, imageElement, placeholderElement, containerElement);
+                } else {
+                    this.showVisualizationPlaceholder(type, componentAvailable, imageElement, placeholderElement, containerElement);
+                }
+            }
+
+            loadVisualizationImage(type, imagePath, imageElement, placeholderElement, containerElement) {
+                containerElement.classList.add('loading');
+                placeholderElement.textContent = `Loading ${type.toUpperCase()} visualization...`;
+                placeholderElement.style.display = 'block';
+                imageElement.style.display = 'none';
+
+                const imageUrl = `/api/visualization/${imagePath}?t=${Date.now()}`;
+                this.log(`Loading ${type} visualization:`, imageUrl);
+
+                imageElement.onload = () => {
+                    this.log(`${type} visualization loaded successfully`);
+                    containerElement.classList.remove('loading');
+                    imageElement.style.display = 'block';
+                    placeholderElement.style.display = 'none';
+                };
+
+                imageElement.onerror = () => {
+                    this.log(`Failed to load ${type} visualization:`, imagePath);
+                    containerElement.classList.remove('loading');
+                    containerElement.classList.add('error');
+                    imageElement.style.display = 'none';
+                    placeholderElement.style.display = 'block';
+                    placeholderElement.textContent = `${type.toUpperCase()} visualization failed to load`;
+                };
+
+                imageElement.src = imageUrl;
+            }
+
+            showVisualizationPlaceholder(type, componentAvailable, imageElement, placeholderElement, containerElement) {
+                imageElement.style.display = 'none';
+                placeholderElement.style.display = 'block';
+
+                if (!componentAvailable) {
+                    containerElement.classList.add('unavailable');
+                    placeholderElement.textContent = `${type.toUpperCase()} model not available - visualization cannot be generated`;
+                } else {
+                    containerElement.classList.add('error');
+                    placeholderElement.textContent = `${type.toUpperCase()} visualization not generated`;
+                }
+            }
+
+            updateProcessingInfo(result) {
+                const processingInfo = document.getElementById('processingInfo');
+                const modelsLoaded = result.models_loaded || {};
+                const loadedCount = Object.values(modelsLoaded).filter(Boolean).length;
+
+                // Update main processing message
+                if (loadedCount === 3) {
+                    processingInfo.className = 'processing-info success';
+                    processingInfo.innerHTML = '<strong>✅ Complete analysis finished!</strong>' +
+                        processingInfo.innerHTML.substring(processingInfo.innerHTML.indexOf('<div'));
+                } else if (loadedCount > 0) {
+                    processingInfo.className = 'processing-info partial';
+                    processingInfo.innerHTML = `<strong>⚠️ Partial analysis completed (${loadedCount}/3 models used)</strong>` +
+                        processingInfo.innerHTML.substring(processingInfo.innerHTML.indexOf('<div'));
+                } else {
+                    processingInfo.className = 'processing-info';
+                    processingInfo.innerHTML = '<strong>⚠️ Basic analysis completed (no AI models available)</strong>' +
+                        processingInfo.innerHTML.substring(processingInfo.innerHTML.indexOf('<div'));
+                }
+
+                // Update method status details
+                this.updateMethodStatus(result);
+            }
+
+            updateMethodStatus(result) {
+                const roiDetails = result.roi_analysis_details || {};
+                const plaDetails = result.pla_analysis_details || {};
+                const classDetails = result.classification_details || {};
+
+                document.getElementById('roiMethodStatus').textContent =
+                    roiDetails.success ? '✅ predict_single_image_roi' : '⚠️ Fallback/Unavailable';
+
+                document.getElementById('plaMethodStatus').textContent =
+                    plaDetails.success ? '✅ process_and_save_single_image' : '⚠️ Fallback/Unavailable';
+
+                document.getElementById('classificationMethodStatus').textContent =
+                    (classDetails.method === 'predict_single_image') ? '✅ predict_single_image' : '⚠️ Fallback method';
+
+                const modelsUsed = Object.values(result.models_loaded || {}).filter(Boolean).length;
+                document.getElementById('modelsUsedStatus').textContent = `${modelsUsed}/3 models active`;
+            }
+
+            showError(message, details = null) {
+                this.log('Showing error:', message, details);
+
+                document.getElementById('errorMessage').textContent = message;
+
+                if (details) {
+                    document.getElementById('errorDetails').style.display = 'block';
+                    document.getElementById('errorDetailsContent').textContent = JSON.stringify(details, null, 2);
+                } else {
+                    document.getElementById('errorDetails').style.display = 'none';
+                }
+
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('results').classList.remove('show');
+            }
+
+            openImageModal(src) {
+                if (!src || src.includes('blob:') === false && src.includes('/api/visualization/') === false) {
+                    return;
+                }
+
+                document.getElementById('modalImage').src = src;
+                document.getElementById('imageModal').style.display = 'block';
+            }
+
+            log(...args) {
+                console.log('[MammographyAnalyzer]', ...args);
+
+                if (this.debugMode) {
+                    const debugContent = document.getElementById('debugContent');
+                    const timestamp = new Date().toLocaleTimeString();
+                    debugContent.textContent += `[${timestamp}] ${args.join(' ')}\n`;
+                    debugContent.scrollTop = debugContent.scrollHeight;
+                }
+            }
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        document.getElementById('imageModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeImageModal();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.mammographyAnalyzer = new MammographyAnalyzer();
+        });
+
+    </script>
+</body>
+
+</html>
